@@ -1,0 +1,17 @@
+groups:
+  - name: shortener-slo
+    rules:
+      - alert: ShortenerHighRedirectLatency
+        expr: histogram_quantile(0.95, sum(rate(http_server_request_duration_seconds_bucket{route="/{code}"}[5m])) by (le)) > 0.15
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Redirect p95 latency above 150ms"
+      - alert: ShortenerLowCacheHitRatio
+        expr: avg_over_time(shortener_cache_hit_ratio[10m]) < 0.80
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Cache hit ratio below 80%"
